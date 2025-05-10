@@ -1,19 +1,19 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { pb, searchSongs, getCurrentUser } from '$lib/pocketbase';
+	import { pb, searchSongs, getCurrentUser, type Song } from '$lib/pocketbase';
 
 	/** @type {string} */
 	let searchQuery = '';
 	/** @type {import('$lib/pocketbase').Song[]} */
-	let results = [];
+	let results: Song[] = [];
 	/** @type {boolean} */
 	let loading = false;
 	/** @type {string | null} */
-	let error = null;
+	let error: string | null = null;
 	/** @type {import('pocketbase').Record | null} */
-	let user = null;
+	let user: any | null = null;
 	/** @type {string[]} */
-	let selectedLanguages = [];
+	let selectedLanguages: string[] = [];
 
 	onMount(async () => {
 		user = getCurrentUser();
@@ -24,7 +24,7 @@
 	});
 
 	async function search() {
-		if (searchQuery.length < 1) {
+		if (!searchQuery || searchQuery.trim().length < 1) {
 			results = [];
 			return;
 		}
@@ -38,12 +38,25 @@
 		} catch (err) {
 			console.error('Error fetching songs:', err);
 			error = 'Failed to fetch results. Please try again.';
+			results = [];
 		} finally {
 			loading = false;
 		}
 	}
 
-	$: searchQuery, search();
+	// Add debouncing to the search to prevent too many requests
+	let searchTimeout: ReturnType<typeof setTimeout> | null = null;
+	function debouncedSearch() {
+		if (searchTimeout) {
+			clearTimeout(searchTimeout);
+		}
+		searchTimeout = setTimeout(() => {
+			search();
+		}, 300);
+	}
+
+	// Use the debounced search instead of immediate search
+	$: searchQuery, debouncedSearch();
 </script>
 
 <div class="min-h-screen bg-gray-950 py-8 text-white">

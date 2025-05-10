@@ -74,30 +74,34 @@ export async function fetchPlaylists(userId: string): Promise<{ items: Playlist[
 
 export async function searchSongs(query: string, languages: string[] = []): Promise<{ items: Song[] }> {
 	try {
-		const filters = [];
-		
-		// Sanitize the query to prevent PocketBase filter syntax errors
-		const safeQuery = query.trim().replace(/['"\\]/g, '');
-		
-		if (safeQuery) {
-			// Use simpler filter conditions to avoid complex syntax
-			filters.push(`title ~ "${safeQuery}"`);
-		}
-		
-		if (languages && languages.length > 0) {
-			const languageFilter = languages.map(lang => `language = "${lang}"`).join(' || ');
-			if (languageFilter) {
-				filters.push(`(${languageFilter})`);
-			}
-		}
-		
-		const filterStr = filters.length > 0 ? filters.join(' && ') : '';
-		console.log("Search filter:", filterStr);
-		
-		return await pb.collection('songs').getList(1, 50, {
-			filter: filterStr,
+		// Get all songs using getFullList instead of filtered getList
+		const allSongs = await pb.collection('songs').getFullList({
 			sort: '-created'
-		});
+		}) as Song[];
+		
+		// Then filter them programmatically to avoid filter syntax errors
+		const safeQuery = query.trim().toLowerCase();
+		
+		let filteredSongs = allSongs;
+		
+		// Apply search query filter if provided
+		if (safeQuery) {
+			filteredSongs = filteredSongs.filter(song => 
+				song.title.toLowerCase().includes(safeQuery)
+			);
+		}
+		
+		// Apply language filter if provided
+		if (languages && languages.length > 0) {
+			filteredSongs = filteredSongs.filter(song => 
+				languages.includes(song.language)
+			);
+		}
+		
+		// Return in the same format as getList for compatibility
+		return {
+			items: filteredSongs
+		};
 	} catch (error) {
 		console.error('Error searching songs:', error);
 		throw error;
