@@ -74,33 +74,44 @@ export async function fetchPlaylists(userId: string): Promise<{ items: Playlist[
 
 export async function searchSongs(query: string, languages: string[] = []): Promise<{ items: Song[] }> {
 	try {
-		// Get all songs using getFullList instead of filtered getList
-		const allSongs = await pb.collection('songs').getFullList({
-			sort: '-created'
-		}) as Song[];
+		const options: any = {
+			sort: '-created',
+			perPage: 50,
+			page: 1
+		};
+
+		// Build filter array
+		const filterConditions = [];
 		
-		// Then filter them programmatically to avoid filter syntax errors
-		const safeQuery = query.trim().toLowerCase();
-		
-		let filteredSongs = allSongs;
-		
-		// Apply search query filter if provided
-		if (safeQuery) {
-			filteredSongs = filteredSongs.filter(song => 
-				song.title.toLowerCase().includes(safeQuery)
-			);
+		// Add title search condition if query exists
+		if (query && query.trim()) {
+			const safeQuery = query.trim().replace(/["'\\]/g, '');
+			filterConditions.push(`title ~ '${safeQuery}'`);
 		}
 		
-		// Apply language filter if provided
+		// Add language filter if languages are selected
 		if (languages && languages.length > 0) {
-			filteredSongs = filteredSongs.filter(song => 
-				languages.includes(song.language)
-			);
+			// Format: language='en' || language='fr'
+			const languageFilter = languages.map(lang => 
+				`language = '${lang.replace(/["'\\]/g, '')}'`
+			).join(' || ');
+			
+			if (languageFilter) {
+				filterConditions.push(`(${languageFilter})`);
+			}
 		}
 		
-		// Return in the same format as getList for compatibility
+		// Combine all conditions with AND operator
+		if (filterConditions.length > 0) {
+			options.filter = filterConditions.join(' && ');
+		}
+		
+		console.log("Filter query:", options.filter || "No filter");
+		
+		// Execute the search
+		const response = await pb.collection('songs').getList(1, 50, options);
 		return {
-			items: filteredSongs
+			items: response.items as unknown as Song[]
 		};
 	} catch (error) {
 		console.error('Error searching songs:', error);
