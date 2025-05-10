@@ -29,5 +29,23 @@ export default defineConfig({
 				}
 			}
 		]
+	},
+	server: {
+		port: 3000,
+		strictPort: false
+	},
+	preview: {
+		port: 3000,
+		strictPort: false
+	},
+	build: {
+		target: 'esnext',
+		minify: 'terser',
+		sourcemap: true,
+		rollupOptions: {
+			output: {
+				manualChunks: undefined
+			}
+		}
 	}
 });
