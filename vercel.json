@@ -5,12 +5,6 @@
   "installCommand": "npm install",
   "framework": "sveltekit",
   "outputDirectory": ".svelte-kit/output",
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ],
   "builds": [
     {
       "src": "package.json",
