@@ -1,8 +1,9 @@
 // src/lib/pocketbase.js
 import PocketBase from 'pocketbase';
+import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
 
 // Create and export the PocketBase instance
-export const pb = new PocketBase('https://p2idzl17fmm0xad.pocketbasecloud.com');
+export const pb = new PocketBase(PUBLIC_POCKETBASE_URL || 'https://p2idzl17fmm0xad.pocketbasecloud.com');
 
 // Type definitions
 export interface Song {
@@ -14,15 +15,21 @@ export interface Song {
 	keywords: string;
 	language: string;
 	links?: string;
+	link2?: string;
+	youtube_id?: string;
 	created_by?: string;
+	created: string;
+	updated: string;
 }
 
 export interface Playlist {
 	id: string;
-	playlist_name: string;
-	field: string[];
-	User: string;
-	Songs: string[];
+	title: string;
+	description: string;
+	Songs: Song[];
+	user_id: string;
+	created: string;
+	updated: string;
 }
 
 export interface FetchSongsOptions {
@@ -53,11 +60,12 @@ export async function fetchSongs(options: FetchSongsOptions = {}): Promise<{ ite
 	}
 }
 
-export async function fetchPlaylists(userId: string): Promise<Playlist[]> {
+export async function fetchPlaylists(userId: string): Promise<{ items: Playlist[] }> {
 	try {
-		return await pb.collection('playlists').getFullList({
-			filter: `User = "${userId}"`,
-			expand: 'Songs'
+		return await pb.collection('playlists').getList(1, 50, {
+			filter: `user_id = "${userId}"`,
+			expand: 'Songs',
+			sort: '-created'
 		});
 	} catch (error) {
 		console.error('Error fetching playlists:', error);
@@ -67,21 +75,22 @@ export async function fetchPlaylists(userId: string): Promise<Playlist[]> {
 
 export async function searchSongs(query: string, languages: string[] = []): Promise<{ items: Song[] }> {
 	try {
-		// Escape single quotes in query for safety
-		const safeQuery = query.replace(/'/g, "\\'");
-
-		// Build language filter part
-		let languageFilter = '';
-		if (languages.length > 0) {
-			languageFilter = languages.map((lang) => `language = '${lang}'`).join(' || ');
+		const filters = [];
+		
+		if (query) {
+			filters.push(`title ~ "${query}" || lyrics_chords ~ "${query}"`);
 		}
-
-		// Build full filter string
-		const searchFilter = `(title ~ '${safeQuery}' || keywords ~ '${safeQuery}' || lyrics_chords ~ '${safeQuery}')`;
-		const fullFilter = languageFilter ? `(${searchFilter}) && (${languageFilter})` : searchFilter;
-
-		return await pb.collection('songs').getList(1, 10, {
-			filter: fullFilter
+		
+		if (languages && languages.length > 0) {
+			const languageFilter = languages.map(lang => `language = "${lang}"`).join(' || ');
+			filters.push(`(${languageFilter})`);
+		}
+		
+		const filterStr = filters.length > 0 ? filters.join(' && ') : '';
+		
+		return await pb.collection('songs').getList(1, 50, {
+			filter: filterStr,
+			sort: '-created'
 		});
 	} catch (error) {
 		console.error('Error searching songs:', error);
