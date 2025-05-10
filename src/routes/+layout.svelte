@@ -6,7 +6,7 @@
 </script>
 
 
-	<div class="min-h-screen bg-gray-950 pb-16">
+	<div class="min-h-screen bg-gray-950">
 		{@render children()}
 	</div>
 

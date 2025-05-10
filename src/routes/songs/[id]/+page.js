@@ -1,13 +1,22 @@
-import PocketBase from "pocketbase";
+import PocketBase from 'pocketbase';
 
 export async function load({ params, fetch }) {
-  const pb = new PocketBase("http://127.0.0.1:8090");
+	const pb = new PocketBase('https://p2idzl17fmm0xad.pocketbasecloud.com');
 
-  try {
-    const song = await pb.collection("songs").getOne(params.id);
-    return { song }; // Return the song properly
-  } catch (error) {
-    console.error("Song not found:", error);
-    return { status: 404, error: new Error("Song not found") };
-  }
+	try {
+		const song = await pb.collection('songs').getOne(params.id);
+		if (!song) {
+			return {
+				status: 404,
+				error: new Error('Song not found')
+			};
+		}
+		return { song };
+	} catch (error) {
+		console.error('Error loading song:', error);
+		return {
+			status: error.status || 500,
+			error: new Error(error.message || 'Failed to load song')
+		};
+	}
 }

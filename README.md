@@ -1,38 +1,57 @@
-# sv
+# PraisePoint
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A modern web application for managing and sharing worship songs and playlists.
 
-## Creating a project
+## Features
 
-If you're seeing this, you've probably already done this step. Congrats!
+- Song management with lyrics and chords
+- Playlist creation and organization
+- Search functionality with language filtering
+- User authentication
+- Responsive design
 
+## Tech Stack
+
+- SvelteKit
+- TypeScript
+- PocketBase
+- TailwindCSS
+
+## Getting Started
+
+1. Clone the repository:
 ```bash
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
+git clone https://github.com/AtheeshaAnarga/PraisePoint.git
+cd PraisePoint
 ```
 
-## Developing
+2. Install dependencies:
+```bash
+npm install
+```
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+3. Create a `.env` file in the root directory with your PocketBase configuration:
+```env
+PUBLIC_POCKETBASE_URL=your_pocketbase_url
+```
 
+4. Start the development server:
 ```bash
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-To create a production version of your app:
+## Building for Production
 
 ```bash
 npm run build
 ```
 
-You can preview the production build with `npm run preview`.
+## Deployment
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+The application is configured for deployment on Vercel. Simply connect your GitHub repository to Vercel and set the environment variables.
+
+## License
+
+MIT

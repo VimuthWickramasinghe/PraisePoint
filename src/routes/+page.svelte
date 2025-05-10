@@ -9,11 +9,8 @@
 		{ id: 'S7LtI3b5wjI?si=_974ePO9lZlnDQfu', title: 'ඔබ ඕනේ' },
 		{ id: 'UD_hMgxKIaw?si=gf0Qi4-ycv_UXsVs', title: 'Video 5' },
 		{ id: 'b6aqCcI-ETU?si=ux4uo2msO79eZlh8', title: 'Video 6' },
-<<<<<<< HEAD
-		{ id: 'ODaSjVPEWAY?si=76r58rloMVGsHhL1', title: 'ගයව් හාලේලූයා'}
-=======
 		{ id: 'ODaSjVPEWAY?si=76r58rloMVGsHhL1', title: 'ගයව් හාලේලූයා' }
->>>>>>> c45a8ad (first)
+
 	];
 
 	let carouselContainer;
@@ -310,7 +307,7 @@
 </section>
 
 <!-- Carousel Container -->
-<section class="relative bg-black py-8">
+<section class="relative bg-black py-8  pb-26 ">
 	<button
 		on:click={scrollPrev}
 		class="scale-126 absolute left-2 top-1/2 z-20 -translate-y-1/2 rounded-full bg-gray-950 p-3 text-white hover:bg-gray-900"

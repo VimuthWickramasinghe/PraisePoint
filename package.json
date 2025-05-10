@@ -43,6 +43,7 @@
 		"vitest": "^3.0.0"
 	},
 	"dependencies": {
+		"jspdf": "^3.0.1",
 		"pocketbase": "^0.26.0"
 	}
 }
