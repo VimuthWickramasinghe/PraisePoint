@@ -4,7 +4,7 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": "sveltekit",
-  "outputDirectory": ".svelte-kit/output",
+  "outputDirectory": ".svelte-kit/output/client",
   "builds": [
     {
       "src": "package.json",
@@ -14,7 +14,7 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/"
+      "destination": "/index.html"
     }
   ]
 } 
