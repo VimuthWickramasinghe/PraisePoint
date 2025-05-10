@@ -44,19 +44,8 @@
 		}
 	}
 
-	// Add debouncing to the search to prevent too many requests
-	let searchTimeout: ReturnType<typeof setTimeout> | null = null;
-	function debouncedSearch() {
-		if (searchTimeout) {
-			clearTimeout(searchTimeout);
-		}
-		searchTimeout = setTimeout(() => {
-			search();
-		}, 300);
-	}
-
-	// Use the debounced search instead of immediate search
-	$: searchQuery, debouncedSearch();
+	// Use the search function directly without debouncing for now
+	$: searchQuery, search();
 </script>
 
 <div class="min-h-screen bg-gray-950 py-8 text-white">

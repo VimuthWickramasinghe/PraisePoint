@@ -74,42 +74,34 @@ export async function fetchPlaylists(userId: string): Promise<{ items: Playlist[
 
 export async function searchSongs(query: string, languages: string[] = []): Promise<{ items: Song[] }> {
 	try {
-		const options: any = {
-			sort: '-created',
-			perPage: 50,
-			page: 1
-		};
-
-		// Build filter array
-		const filterConditions = [];
-		
-		// Add title search condition if query exists
-		if (query && query.trim()) {
-			const safeQuery = query.trim().replace(/["'\\]/g, '');
-			filterConditions.push(`title ~ '${safeQuery}'`);
+		if (!query || query.trim().length === 0) {
+			return { items: [] };
 		}
 		
-		// Add language filter if languages are selected
-		if (languages && languages.length > 0) {
-			// Format: language='en' || language='fr'
-			const languageFilter = languages.map(lang => 
-				`language = '${lang.replace(/["'\\]/g, '')}'`
-			).join(' || ');
+		// Escape single quotes in searchQuery for safety
+		const safeQuery = query.replace(/'/g, "\\'");
+		
+		// Build language filter part
+		let languageFilter = "";
+		if (languages.length > 0) {
+			languageFilter = languages
+				.map((lang) => `language = '${lang}'`)
+				.join(" || ");
+		}
+		
+		// Build full filter string
+		const searchFilter = `(title ~ '${safeQuery}' || keywords ~ '${safeQuery}' || lyrics_chords ~ '${safeQuery}')`;
+		const fullFilter = languageFilter
+			? `(${searchFilter}) && (${languageFilter})`
+			: searchFilter;
 			
-			if (languageFilter) {
-				filterConditions.push(`(${languageFilter})`);
-			}
-		}
+		console.log("Using filter:", fullFilter);
 		
-		// Combine all conditions with AND operator
-		if (filterConditions.length > 0) {
-			options.filter = filterConditions.join(' && ');
-		}
+		// Make the API call
+		const response = await pb.collection("songs").getList(1, 10, {
+			filter: fullFilter,
+		});
 		
-		console.log("Filter query:", options.filter || "No filter");
-		
-		// Execute the search
-		const response = await pb.collection('songs').getList(1, 50, options);
 		return {
 			items: response.items as unknown as Song[]
 		};
