@@ -1,9 +1,8 @@
 // src/lib/pocketbase.js
 import PocketBase from 'pocketbase';
-import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
 
 // Create and export the PocketBase instance
-export const pb = new PocketBase(PUBLIC_POCKETBASE_URL || 'https://p2idzl17fmm0xad.pocketbasecloud.com');
+export const pb = new PocketBase('https://p2idzl17fmm0xad.pocketbasecloud.com');
 
 // Type definitions
 export interface Song {
@@ -77,16 +76,23 @@ export async function searchSongs(query: string, languages: string[] = []): Prom
 	try {
 		const filters = [];
 		
-		if (query) {
-			filters.push(`title ~ "${query}" || lyrics_chords ~ "${query}"`);
+		// Sanitize the query to prevent PocketBase filter syntax errors
+		const safeQuery = query.trim().replace(/['"\\]/g, '');
+		
+		if (safeQuery) {
+			// Use simpler filter conditions to avoid complex syntax
+			filters.push(`title ~ "${safeQuery}"`);
 		}
 		
 		if (languages && languages.length > 0) {
 			const languageFilter = languages.map(lang => `language = "${lang}"`).join(' || ');
-			filters.push(`(${languageFilter})`);
+			if (languageFilter) {
+				filters.push(`(${languageFilter})`);
+			}
 		}
 		
 		const filterStr = filters.length > 0 ? filters.join(' && ') : '';
+		console.log("Search filter:", filterStr);
 		
 		return await pb.collection('songs').getList(1, 50, {
 			filter: filterStr,
