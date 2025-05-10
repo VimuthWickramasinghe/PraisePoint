@@ -6,7 +6,8 @@ const config = {
 	kit: {
 		adapter: adapter({
 			runtime: 'nodejs18.x',
-			split: false
+			split: false,
+			fallback: 'index.html'
 		}),
 		paths: {
 			base: ''
